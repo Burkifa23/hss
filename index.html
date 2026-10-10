@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,viewport-fit=cover">
+    <title>Ashesi Volunteer Portal</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Phosphor Icons (Premium Icon Set) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Security & Export Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+</head>
+
+<body>
+
+    <!-- UNIFIED NAVIGATION -->
+    <nav class="ashesi-nav">
+        <div class="nav-brand">
+            <div class="brand-logo">HSS</div>
+            <div class="brand-text">
+                <div class="title">Ashesi Volunteer Portal</div>
+                <div class="subtitle">Humanities & Social Sciences</div>
+            </div>
+        </div>
+        <div class="nav-links">
+            <button class="nav-tab active" data-target="dashboard"><i class="ph ph-squares-four"></i> Dashboard</button>
+            <button class="nav-tab" data-target="picker"><i class="ph ph-clipboard-text"></i> Task Picker</button>
+            <button class="nav-tab" data-target="tracker"><i class="ph ph-clock"></i> Tracker</button>
+            <button class="nav-tab" data-target="master"><i class="ph ph-table"></i> Master Sheet</button>
+        </div>
+    </nav>
+
+    <!-- TOAST NOTIFICATIONS -->
+    <div class="toast" id="app-toast">
+        <i class="ph ph-info toast-icon"></i>
+        <span class="toast-msg"></span>
+    </div>
+
+    <main class="app-container">
+
+        <!-- ================= VIEW 1: DASHBOARD ================= -->
+        <div id="view-dashboard" class="app-view active">
+            <div class="dash-hero">
+                <h1>Welcome to the HSS Volunteer Portal</h1>
+                <p>Manage event sign-ups, track volunteer hours, and monitor team capacities.</p>
+                <div id="user-status-badge">Checking authentication...</div>
+            </div>
+
+            <div class="dash-grid">
+                <div class="dash-card" data-action="nav" data-target="picker">
+                    <i class="ph ph-clipboard-text card-icon"></i>
+                    <div class="card-content">
+                        <h3>Task Picker</h3>
+                        <p>View roles and sign up for event teams.</p>
+                    </div>
+                    <span class="card-link">Go to Task Picker &rarr;</span>
+                </div>
+                <div class="dash-card" data-action="nav" data-target="tracker">
+                    <i class="ph ph-clock card-icon"></i>
+                    <div class="card-content">
+                        <h3>Time Tracker</h3>
+                        <p>Group leads log times and export XLSX rosters.</p>
+                    </div>
+                    <span class="card-link">Go to Tracker &rarr;</span>
+                </div>
+                <div class="dash-card" data-action="nav" data-target="master">
+                    <i class="ph ph-table card-icon"></i>
+                    <div class="card-content">
+                        <h3>Master Sheet</h3>
+                        <p>Aggregated semester view of all records.</p>
+                    </div>
+                    <span class="card-link">Go to Master Sheet &rarr;</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VIEW 2: TASK PICKER ================= -->
+        <div id="view-picker" class="app-view">
+            <div class="module-header">
+                <div class="module-title">
+                    <h2>Volunteer Roster & Sign-ups</h2>
+                    <p>Select an event and join a team below.</p>
+                </div>
+                <div class="module-actions" id="picker-hdr-actions"></div>
+            </div>
+            <div id="picker-event-bar"></div>
+            <div id="picker-main"></div>
+        </div>
+
+        <!-- ================= VIEW 3: TRACKER ================= -->
+        <div id="view-tracker" class="app-view">
+            <div class="module-header">
+                <div class="module-title">
+                    <h2>Group Lead Task Tracker</h2>
+                    <p id="tracker-count-label">Select an event or task to track</p>
+                </div>
+                <div class="module-actions" id="tracker-hdr-actions"></div>
+            </div>
+
+            <div id="tracker-tasks-grid" class="tracker-grid"></div>
+
+            <div id="tracker-detail-view" style="display:none;">
+                <div class="breadcrumb">
+                    <a data-action="close-tracker"><i class="ph ph-arrow-left"></i> Back to Events</a>
+                    <span id="tr-breadcrumb-name"></span>
+                </div>
+                <div class="tracker-card detail-header">
+                    <h3 id="tr-detail-name">Event Name</h3>
+                    <p id="tr-perm-note" class="perm-note"></p>
+                </div>
+
+                <div class="table-wrap">
+                    <table id="tr-members-table">
+                        <thead>
+                            <tr>
+                                <th>No.</th>
+                                <th>Group Member Name</th>
+                                <th>Student ID</th>
+                                <th>Team</th>
+                                <th>Reporting Time</th>
+                                <th>Activity Start</th>
+                                <th>Activity End</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tr-members-tbody"></tbody>
+                    </table>
+                </div>
+                <div class="tracker-actions">
+                    <button class="btn-primary" data-action="export-tracker"><i class="ph ph-download-simple"></i>
+                        Download XLSX</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= VIEW 4: MASTER SHEET ================= -->
+        <div id="view-master" class="app-view">
+            <div class="module-header">
+                <div class="module-title">
+                    <h2>Dynamic Volunteer Tracker</h2>
+                    <p>Aggregated view of all volunteer records.</p>
+                </div>
+                <div class="module-actions">
+                    <button class="btn-primary" data-action="export-master"><i class="ph ph-download-simple"></i> Export
+                        Master XLSX</button>
+                </div>
+            </div>
+            <div id="master-filters" class="master-filters"></div>
+            <div id="master-stats" class="stat-grid"></div>
+            <div class="master-table-wrapper">
+                <table class="master-table">
+                    <thead id="master-head"></thead>
+                    <tbody id="master-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="modals-container"></div>
+
+    <!-- MAIN APP LOGIC -->
+    <script type="module" src="app.js"></script>
+</body>
+
+</html>
